@@ -70,6 +70,6 @@ For simplicity sake, only one promotion code can be applied at a time.
   given in docker-compose.yml
 
 ## Not addressed
-  - Mocha, Chai based Unit testing
-  - Jest based Unit testing
+  - Mocha, Chai based Unit testing in productcart-service
+  - Jest based Unit testing in productcart-client
 
