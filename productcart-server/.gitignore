@@ -1,0 +1,14 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# log
+/logs
+/dist
+/mongodb  
+/node_modules
+*.code-workspace
+*lock*
+.vscode
+/out
+
+# Local Netlify folder
+.netlify

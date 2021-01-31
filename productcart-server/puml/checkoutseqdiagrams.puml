@@ -1,0 +1,68 @@
+@startuml
+title CheckOut Shopping Cart Sequence Diagram
+
+skinparam shadowing false
+skinparam actor {
+	BorderColor black
+	BackgroundColor white
+}
+skinparam participant {
+	BorderColor black
+	BackgroundColor white
+}
+skinparam sequence {
+	LifeLineBorderColor black
+}
+skinparam ArrowColor black
+skinparam noteBorderColor black
+
+actor Actor
+participant "Client \nApplication/Swagger" as Client
+participant "Express \nServer" as Server
+participant "Shopping Cart \nRoute" as Route
+participant "Ajv Schema \nValidator" as Ajv
+participant "Product \nService" as ProductService
+participant "DB Product \nService" as DBService
+participant "Pricing \nRules" as PricingRules
+participant "Product Model" as ProductModel
+
+box "Running \nunder Docker\n container" #skyBlue
+participant "MongoDB" as MongoDB
+end box
+
+Actor -> Client: Calculate checkout \nprice
+note right: Note: Swagger http://localhost:4100
+Client -> Server: POST: \ncheckout()
+activate Server
+note left: Note: Get checkout \nprice for the \nshopping cart
+Server -> Route : POST: \ncheckout()
+activate Route
+Route -> Ajv: validate()
+note bottom: Note: Validate whether \nschema is valid or not
+Ajv--> Route
+Route -> ProductService: checkout()
+activate ProductService
+ProductService -> DBService: getProducts()
+activate DBService
+DBService -> ProductModel
+activate ProductModel
+ProductModel -> MongoDB
+MongoDB -> MongoDB
+MongoDB --> ProductModel
+ProductModel --> DBService
+deactivate ProductModel
+DBService --> ProductService
+deactivate DBService
+ProductService -> PricingRules: calculateTotal()
+activate PricingRules
+PricingRules -> PricingRules : runPercentageRule()/\nrunFixedAmountRule()/\nrunFixedAmountDependentIdRule/\nrunDefaultRule
+PricingRules --> ProductService
+deactivate PricingRules
+ProductService --> Route
+Route --> Server
+deactivate ProductService
+deactivate Ajv
+deactivate Route
+Server --> Client
+deactivate Server
+@enduml

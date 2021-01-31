@@ -1,0 +1,204 @@
+openapi: "3.0.0"
+info:
+  title: Product Cart App
+  description: This is a sample server for a product cart.
+  termsOfService: http://productcart.com/terms/
+  contact:
+    name: Ryan Golash
+    url: http://www.productcart.com/support
+    email: ryan.gupta501@gmail.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: '{protocol}://localhost:{port}/{basePath}'
+    description: The production API server
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      username:
+        # note! no enum here means it is an open value
+        default: demo
+        description: this value is assigned by the service provider, in this productcart `gigantic-server.com`
+      port:
+        enum:
+          - '3000'
+          - '3001'
+        default: '3000'
+      basePath:
+        # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v1`
+        default: api/v1
+paths:
+  /ping:
+    get:
+      summary: Check the availability of the service
+      tags:
+        - healthcheck
+      servers:
+        - url: '{protocol}://localhost:3000'
+          description: Override base path for the GET /ping operation
+          variables:
+            protocol:
+              enum:
+                - http
+                - https
+              default: http
+            port:
+              enum:
+                - '3000'
+                - '3001'
+              default: '3000'
+      responses:
+        '200':
+          description: JSON object with success, timestamp, message and list of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /products:
+    get:
+      summary: Get all the products in DB
+      tags:
+        - products
+      responses:
+        '200':
+          description: JSON object with success, timestamp, message and list of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Products'
+    post:
+      summary: Add a product in DB
+      tags:
+        - products
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the product to update
+      requestBody:
+        description: Attributes of product to add a product
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: JSON object with success, timestamp, message and show the added product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    put:
+      summary: Update a product in DB
+      tags:
+        - products
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the product to update
+      requestBody:
+        description: Attributes of product to update a product
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: JSON object with success, timestamp, message and show the updated product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /checkout:
+    post:
+      summary: Retrieves the total price of the shopping cart
+      operationId: checkout
+      tags:
+        - checkout
+      requestBody:
+        description: Cart Checkout 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ICheckedOutCart'
+      responses:
+        '200':
+          description: JSON object with success, timestamp, message and list of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - img
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: integer
+          format: int64
+          default: 0.0
+        img:
+          type: string
+    Products:
+      type: array
+      items:
+        $ref: "#/components/schemas/Product"
+    ICheckedOutCart:
+      type: object
+      properties:
+        checkedOutProducts:
+          type: array
+          required: true,
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              count:
+                type: number
+        promotionCode:
+          type: string
+          required: true,
+    Response:
+      type: object
+      required:
+        - success
+        - timestamp
+        - message
+        - data
+      properties:
+        success:
+          type: string
+          enum:
+            - true
+            - false
+          default: true
+        timestamp:
+          type: string
+          format: date-time
+          default: '2017-07-21T17:32:28Z'
+        message:
+          type: string
+   

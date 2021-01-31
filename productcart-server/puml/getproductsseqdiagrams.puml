@@ -1,0 +1,58 @@
+@startuml
+title Fetch All Products Sequence Diagram
+
+skinparam shadowing false
+skinparam actor {
+    BorderColor black
+    BackgroundColor white
+}
+skinparam participant {
+    BorderColor black
+    BackgroundColor white
+}
+skinparam sequence {
+    LifeLineBorderColor black
+}
+skinparam ArrowColor black
+skinparam noteBorderColor black
+
+actor Actor
+participant "Client \nApplication/Swagger" as Client
+participant "Express \nServer" as Server
+participant "Product \nRoute" as Route
+participant "Product \nService" as ProductService
+participant "DB Product \nService" as DBService
+participant "Product Model" as ProductModel
+
+box "Running \nunder Docker\n container" #skyBlue
+participant "MongoDB" as MongoDB
+end box
+
+Actor -> Client: Fetch all products\n from the store
+note right: Note: Swagger http://localhost:4100
+Client -> Server: GET: /api/v1/products
+activate Server
+note left: Note: Fetch all products \nprice for the \nDB
+Server -> Route : GET: \nproducts()
+activate Route
+Route -> ProductService: getAllProducts()
+activate ProductService
+ProductService -> DBService: getProducts()
+activate DBService
+DBService -> ProductModel: find{}
+note right: Note: Fetch all \nproducts from \nthe remote MongoDB
+activate ProductModel
+ProductModel -> MongoDB
+MongoDB -> MongoDB
+MongoDB --> ProductModel
+ProductModel --> DBService
+deactivate ProductModel
+DBService --> ProductService
+deactivate DBService
+ProductService --> Route
+Route --> Server
+deactivate ProductService
+deactivate Route
+Server --> Client
+deactivate Server
+@enduml
